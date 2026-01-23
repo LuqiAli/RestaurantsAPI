@@ -184,21 +184,16 @@ Testing has not yet been implemented as of yet
 
 ## Features To Be Added
 
-<<<<<<< HEAD
 ##### Essential Implementations
 
 - Order functionality
 - Restaurant tags implementation
 - Error handling
 
+##### Non Essential Implementations
+
 I plan to expand on this project once all other essential implementations have been added which include
 
 - Database migration
 - Authentication using email to verify a user
 - More advanced logging system
-=======
-I plan to expand on this project once all other basic implementations have been added which include:
-
-- Database migration
-- Authentication using email to verify a user
->>>>>>> 3d3ffb069521c913a69784c6c6e701601205d423
