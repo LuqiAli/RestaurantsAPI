@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction} from "express"
+import { Request, Response } from "express"
 import { OrdersInterface, OrdersInterfaceBody } from "../type/orders";
 import db from "../config/db"
 

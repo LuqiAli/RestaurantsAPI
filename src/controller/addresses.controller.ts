@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction} from "express"
+import { Request, Response } from "express"
 import { AddressInterface, AddressInterfaceBody } from "../type/addresses";
 import db from "../config/db"
 

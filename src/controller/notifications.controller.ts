@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction} from "express"
+import { Request, Response } from "express"
 import { NotificationsInterface, NotificationsInterfaceBody } from "../type/notifications";
 import db from "../config/db"
 

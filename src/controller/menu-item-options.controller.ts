@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction} from "express"
+import { Request, Response } from "express"
 import { MenuItemOptionsInterface, MenuItemOptionsInterfaceBody } from "../type/menu-item-options";
 import db from "../config/db"
 
