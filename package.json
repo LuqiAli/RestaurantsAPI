@@ -1,22 +1,15 @@
 {
   "name": "restaurant-project",
   "version": "1.0.0",
-<<<<<<< HEAD
   "main": "src/app.ts",
   "scripts": {
-    "start": "nodemon src/app.ts"
-=======
-  "main": "app.js",
-  "scripts": {
-    "start": "nodemon app.js"
->>>>>>> cc0c154bca25823030e48b038a519f8015e7a6a2
+    "dev": "nodemon src/app.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-<<<<<<< HEAD
     "@types/bcrypt": "^6.0.0",
     "@types/connect-pg-simple": "^7.0.3",
     "@types/express": "^5.0.6",
@@ -34,13 +27,7 @@
     "express-session": "^1.18.2",
     "pg": "^8.13.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
-=======
+    "swagger-ui-express": "^5.0.1",
     "nodemon": "^3.1.7"
-  },
-  "dependencies": {
-    "express": "^4.21.0",
-    "pg": "^8.13.0"
->>>>>>> cc0c154bca25823030e48b038a519f8015e7a6a2
   }
 }

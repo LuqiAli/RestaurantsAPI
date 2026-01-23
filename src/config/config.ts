@@ -14,6 +14,8 @@ export const DB_DATABASE = process.env.DB_DATABASE
 export const SERVER_PORT = process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 5000
 export const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME || "localhost"
 
+export const SESSION_SECRET: string = process.env.SESSION_SECRET || "default_secret_key_dont_forget_to_update"
+
 export const SERVER = {
     SERVER_PORT,
     SERVER_HOSTNAME

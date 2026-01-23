@@ -122,6 +122,10 @@ router.get("/:address_id", getAddress);
  *              properties:
  *                address_1: 
  *                  type: string
+ *                address_2: 
+ *                  type: string
+ *                address_3: 
+ *                  type: string
  *                city:
  *                  type: string
  *                town:
