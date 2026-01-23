@@ -184,6 +184,7 @@ Testing has not yet been implemented as of yet
 
 ## Features To Be Added
 
-I plan to expand on this project once all other basic implementations have been added which include
+I plan to expand on this project once all other basic implementations have been added which include:
 
+- Database migration
 - Authentication using email to verify a user
