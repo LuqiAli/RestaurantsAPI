@@ -171,9 +171,7 @@ This API uses session-based authentication with cookies.
 
 ## Error Handling
 
-Error handling has not yet been fully implemented as of yet
-
-Some errors have been implemented via json in the following format
+Error handling has not been fully implemented as of yet; however, some errors have been implemented via json in the following format
 ```json
 {
     status: "failure", data: "Error message" 
@@ -183,3 +181,17 @@ Some errors have been implemented via json in the following format
 ## Testing
 
 Testing has not yet been implemented as of yet
+
+## Features To Be Added
+
+##### Essential Implementations
+
+- Order functionality
+- Restaurant tags implementation
+- Error handling
+
+I plan to expand on this project once all other essential implementations have been added which include
+
+- Database migration
+- Authentication using email to verify a user
+- More advanced logging system
