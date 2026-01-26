@@ -189,6 +189,7 @@ Testing has not yet been implemented as of yet
 - Order functionality
 - Restaurant tags implementation
 - Error handling
+- Testing
 
 ##### Non Essential Implementations
 

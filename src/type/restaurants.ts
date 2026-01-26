@@ -1,17 +1,15 @@
+export interface Tags {
+    id: string
+    title: string
+    type: string
+}
+
 export interface RestaurantsInterface {
     id: string
     name: string
     website: string
     phone: number
-    tag_ids: string[]
-    tag_titles: string[]
-}
-
-export interface PostRestaurants {
-    name: string
-    website: string
-    phone: number
-    tags: string[]
+    tags: Tags[]
 }
 
 export interface RestaurantsInterfaceBody {

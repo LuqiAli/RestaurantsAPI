@@ -51,6 +51,17 @@ router.get("/", getOrders);
  *                 type: string
  *                 enum: [delivery, collection]
  *                 description: Order type
+ *               items: 
+ *                  type: array
+ *                  items:
+ *                      type: object
+ *                      properties: 
+ *                          item_id: 
+ *                              type: string
+ *                          quantity: 
+ *                              type: integer
+ *                          item_price: 
+ *                              type: integer
  *     responses:
  *       201:
  *         description: Order created successfully

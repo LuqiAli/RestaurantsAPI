@@ -20,6 +20,8 @@ CREATE TABLE restaurants (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+SELECT restaurants.id, restaurants.name, restaurants.website, restaurants.phone, tags FROM restaurants LEFT JOIN (SELECT restaurant_tags.restaurant_id, ARRAY_AGG(json_build_object('id', restaurant_tags.tag_id, 'title', tags.title, 'type', tags.type)) as tags FROM restaurant_tags LEFT JOIN tags ON restaurant_tags.tag_id = tags.id GROUP BY restaurant_tags.restaurant_id) as tags ON restaurants.id = tags.restaurant_id;
+
 CREATE TRIGGER set_timestamp 
 BEFORE UPDATE ON users
 FOR EACH ROW
@@ -52,6 +54,18 @@ CREATE TABLE orders (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE order_items (
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id uuid NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    item_id uuid NOT NULL,
+    FOREIGN KEY (item_id) REFERENCES menu_items(id) ON DELETE CASCADE,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    item_price NUMERIC(10, 2) NOT NULL
+);
+
+SELECT orders.id, orders.restaurant_id, orders.user_id, orders.is_delivery, orders.status, orders.delivery_address, orders.total_amount, (SELECT json_build_object('order_items_id', order_items.id, 'item_id', order_items.item_id, 'quantity', order_items.quantity, 'item_price', order_items.item_price) AS order_items FROM order_items) FROM orders;
 
 CREATE TRIGGER set_timestamp 
 BEFORE UPDATE ON addresses
