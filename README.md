@@ -109,6 +109,18 @@ API documentation has been implemented using Swagger UI under the endpoint **/ap
 >**Type of array containing objects: [{item_id, quantity, item_price}]
 >***Type of enum, only accepts: processing, recieved, preparing, delivery
 
+### Tags
+
+| Method | Endpoint        | Description | Expected input in body |
+|------|----------------|-------------|---------------------------|
+| GET | /api/v1/tags | Get all tags | n/a |
+| POST | /api/v1/tags| Post new tag | title, type* |
+| GET | /api/v1/tags/:id | Get tag by id | n/a |
+| PUT | /api/v1/tags/:id | Update tag | title, type* |
+| DELETE | /api/v1/tags/:id | Delete tag | n/a |
+
+>\*Type of enum, only accepts: cuisine, dietary, dishes, type
+
 ### Menu Sections
 
 | Method | Endpoint        | Description | Expected input in body |
@@ -184,14 +196,12 @@ Testing has not yet been implemented as of yet
 
 ## Features To Be Added
 
-##### Essential Implementations
+#### Essential Implementations
 
-- Order functionality
-- Restaurant tags implementation
 - Error handling
 - Testing
 
-##### Non Essential Implementations
+#### Non Essential Implementations
 
 I plan to expand on this project once all other essential implementations have been added which include
 

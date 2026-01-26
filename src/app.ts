@@ -11,6 +11,7 @@ import menu_item_options from "./route/menu-item-options";
 import notifications from "./route/notifications";
 import reviews from "./route/reviews";
 import auth from "./route/auth";
+import tags from "./route/tags";
 
 import { SERVER } from "./config/config";
 import { loggingHandler } from "./middleware/loggingHandler";
@@ -41,9 +42,10 @@ app.use("/api/v1/menu-sections", menu_sections);
 app.use("/api/v1/menu-items", menu_items);
 app.use("/api/v1/menu-item-options", menu_item_options);
 app.use("/api/v1/reviews", reviews);
+app.use("/api/v1/tags", tags);
 app.use("/api/v1/auth", auth);
 
-app.use(authenticate)
+// app.use(authenticate)
 
 app.use("/api/v1/notifications", notifications);
 
