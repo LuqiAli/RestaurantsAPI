@@ -100,14 +100,14 @@ API documentation has been implemented using Swagger UI under the endpoint **/ap
 | Method | Endpoint        | Description | Expected input in body |
 |------|----------------|-------------|---------------------------|
 | GET | /api/v1/orders | Get all orders | n/a |
-| POST | /api/v1/orders| Post new order | restaurant_id, user_id, delivery_address, type* |
+| POST | /api/v1/orders| Post new order | restaurant_id, user_id, delivery_address, type*, items** |
 | GET | /api/v1/orders/:id | Get order by id | n/a |
-| PUT | /api/v1/orders/:id | Update order | status** |
+| PUT | /api/v1/orders/:id | Update order | status*** |
 | DELETE | /api/v1/orders/:id | Delete order | n/a |
 
 >\*Type of enum, only accepts: delivery or collection
->**Type of enum, only accepts: processing, recieved, preparing, delivery
->***Implementation of orders still work in progress
+>**Type of array containing objects: [{item_id, quantity, item_price}]
+>***Type of enum, only accepts: processing, recieved, preparing, delivery
 
 ### Menu Sections
 

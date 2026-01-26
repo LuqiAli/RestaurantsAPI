@@ -43,7 +43,7 @@ export async function getRestaurant(req: Request, res: Response) {
         const { restaurant_id } = req.params;
 
         const result: RestaurantsInterface = (await db.query(
-            `SELECT restaurants.id, name, website, phone, ARRAY_AGG(restaurant_tags.id) AS tag_ids, ARRAY_AGG(tags.title) AS tag_titles FROM restaurants LEFT JOIN restaurant_tags ON restaurants.id = restaurant_tags.restaurant_id LEFT JOIN tags ON restaurant_tags.tag_id = tags.id WHERE restaurants.id = '${restaurant_id}' GROUP BY restaurants.id;`
+            `SELECT restaurants.id, restaurants.name, restaurants.website, restaurants.phone, tags FROM restaurants LEFT JOIN (SELECT restaurant_tags.restaurant_id, ARRAY_AGG(json_build_object('id', restaurant_tags.tag_id, 'title', tags.title, 'type', tags.type)) as tags FROM restaurant_tags LEFT JOIN tags ON restaurant_tags.tag_id = tags.id GROUP BY restaurant_tags.restaurant_id) as tags ON restaurants.id = tags.restaurant_id WHERE restaurants.id = '${restaurant_id}';`
         )).rows;
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
