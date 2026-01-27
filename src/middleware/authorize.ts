@@ -8,6 +8,7 @@ export function authorize(role: string) {
         if (roles.includes(role)) {
             const err = new Error("Unauthorized")
             next(err)
+            
         }
         res.status(403).json({ status: "failure", data: "Forbidden"})
     }
