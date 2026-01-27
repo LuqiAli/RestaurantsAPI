@@ -8,7 +8,8 @@ const pgStore = pgSession(session)
 export const sessionMiddleware = session({
     store: new pgStore({
         pool: pool,
-        createTableIfMissing: true
+        createTableIfMissing: true,
+        pruneSessionInterval: 600
     }),
     name: "sessionId",
     secret: SESSION_SECRET,

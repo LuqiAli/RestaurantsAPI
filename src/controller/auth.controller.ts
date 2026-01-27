@@ -7,6 +7,7 @@ import { Session } from 'express-session'
 declare module 'express-session' {
     interface Session extends SessionData {
         userId: string;
+        roles: string[]
     }
 }
 
@@ -30,6 +31,7 @@ export async function loginController(req: Request, res: Response) {
         const sessionData: Session = req.session
 
         sessionData.userId  = user.id
+        sessionData.roles = user.roles
         
         res.status(201).json({ status: "success", data: user });
     } catch (err) {

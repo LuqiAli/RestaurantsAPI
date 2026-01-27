@@ -6,6 +6,7 @@ export interface UsersInterface {
     created_at: string
     updated_at: string
     phone: string
+    roles: string[]
 }
 
 export interface UsersInterfaceBody {

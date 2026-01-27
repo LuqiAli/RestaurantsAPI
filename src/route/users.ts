@@ -104,6 +104,7 @@ router.get("/:user_id", getUser);
  *                - password    
  *                - email
  *                - phone
+ *                - roles
  *              properties:
  *                name: 
  *                  type: string
@@ -113,6 +114,8 @@ router.get("/:user_id", getUser);
  *                  type: string  
  *                phone: 
  *                  type: integer
+ *                roles: 
+ *                  type: string[]
  *      responses:
  *        200:
  *          description: User updated successfully

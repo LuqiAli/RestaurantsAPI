@@ -18,6 +18,7 @@ import { loggingHandler } from "./middleware/loggingHandler";
 import { authenticate } from "./middleware/authenticate";
 import { sessionMiddleware } from "./middleware/session";
 import { swaggerMiddleware } from "./config/swagger";
+import { authorize } from "./middleware/authorize";
 
 // parse form data
 app.use(express.urlencoded({ extended: false }));
@@ -41,11 +42,11 @@ app.use("/api/v1/orders", orders);
 app.use("/api/v1/menu-sections", menu_sections);
 app.use("/api/v1/menu-items", menu_items);
 app.use("/api/v1/menu-item-options", menu_item_options);
-app.use("/api/v1/reviews", reviews);
 app.use("/api/v1/tags", tags);
 app.use("/api/v1/auth", auth);
+app.use("/api/v1/reviews", reviews);
 
-// app.use(authenticate)
+app.use(authenticate)
 
 app.use("/api/v1/notifications", notifications);
 
