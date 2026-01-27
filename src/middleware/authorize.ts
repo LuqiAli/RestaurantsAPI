@@ -5,8 +5,10 @@ export function authorize(role: string) {
     return function (req: Request, res: Response, next: NextFunction) {
         const roles = req.session.roles
         
-        console.log(roles.includes(role))
-
-        next()
+        if (roles.includes(role)) {
+            const err = new Error("Unauthorized")
+            next(err)
+        }
+        res.status(403).json({ status: "failure", data: "Forbidden"})
     }
 }
