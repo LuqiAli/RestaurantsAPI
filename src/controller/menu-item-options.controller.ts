@@ -4,7 +4,9 @@ import db from "../config/db"
 
 export async function getMenuItemOptions(req: Request, res: Response) {
     try {
-        const result: MenuItemOptionsInterface[] = (await db.query("SELECT * FROM menu_item_options;")).rows;
+        const { restaurant_id } = req.params
+        
+        const result: MenuItemOptionsInterface[] = (await db.query(`SELECT * FROM menu_item_options WHERE restaurant_id = '${restaurant_id}';`)).rows;
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
@@ -15,17 +17,18 @@ export async function getMenuItemOptions(req: Request, res: Response) {
 
 export async function postMenuItemOptions(req: Request, res: Response) {
     try {
-        const { menu_item_id, name, price } = req.body as MenuItemOptionsInterfaceBody;
-
+        const { menu_item_id, name, price, required } = req.body as MenuItemOptionsInterfaceBody;
+        const { restaurant_id }  = req.params
+        
         if (!price.toString().includes(".")) {
             await db.query(
-                `INSERT INTO menu_item_options (menu_item_id, name, price) VALUES ('${menu_item_id}', '${name}', '${price}');`
+                `INSERT INTO menu_item_options (menu_item_id, name, price, restaurant_id, required) VALUES ('${menu_item_id}', '${name}', '${price}', '${restaurant_id}', ${required});`
             );
         } else if (price.toString().split(".")[1].length > 2) {
             res.status(400).json({ status: "failiure", data: "Price must have maximum of 2 decimal places." })
         } else {
             await db.query(
-                `INSERT INTO menu_item_options (menu_item_id, name, price) VALUES ('${menu_item_id}', '${name}', '${price}');`
+                `INSERT INTO menu_item_options (menu_item_id, name, price, restaurant_id, required) VALUES ('${menu_item_id}', '${name}', '${price}', '${restaurant_id}', ${required});`
             );
         }
         res.status(201).json({ status: "success" });
@@ -37,10 +40,10 @@ export async function postMenuItemOptions(req: Request, res: Response) {
 
 export async function getMenuItemOption(req: Request, res: Response) {
     try {
-        const { menu_item_option_id } = req.params;
+        const { menu_item_option_id, restaurant_id } = req.params;
 
         const result: MenuItemOptionsInterface = (await db.query(
-            `SELECT * FROM menu_item_options WHERE id = '${menu_item_option_id}';`
+            `SELECT * FROM menu_item_options WHERE id = '${menu_item_option_id}' AND restaurant_id = '${restaurant_id}';`
         )).rows;
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
@@ -51,17 +54,19 @@ export async function getMenuItemOption(req: Request, res: Response) {
 export async function putMenuItemOptions(req: Request, res: Response) {
     try {
         const { menu_item_option_id } = req.params;
-        const { name, price } = req.body as MenuItemOptionsInterfaceBody;
+        const { name, price, required } = req.body as MenuItemOptionsInterfaceBody;
     
+        console.log(required)
+        
         if (!price.toString().includes(".")) {
             await db.query(
-                `UPDATE menu_item_options set name = '${name}', price = '${price}' WHERE id = '${menu_item_option_id}';`
+                `UPDATE menu_item_options set name = '${name}', price = '${price}', required = ${required} WHERE id = '${menu_item_option_id}';`
             );
         } else if (price.toString().split(".")[1].length > 2) {
             res.status(400).json({ status: "failiure", data: "Price must have maximum of 2 decimal places." })
         } else {
         await db.query(
-            `UPDATE menu_item_options set name = '${name}', price = '${price}' WHERE id = '${menu_item_option_id}';`
+            `UPDATE menu_item_options set name = '${name}', price = '${price}', required = ${required} WHERE id = '${menu_item_option_id}';`
         );
         }
         res.status(201).json({ status: "success" });

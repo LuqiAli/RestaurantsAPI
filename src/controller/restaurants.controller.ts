@@ -5,7 +5,7 @@ import db from "../config/db"
 export async function getRestaurants(req: Request, res: Response) {
     try {
         const query: string = `SELECT restaurants.id, restaurants.name, restaurants.website, restaurants.phone, tags FROM restaurants LEFT JOIN (SELECT restaurant_tags.restaurant_id, ARRAY_AGG(json_build_object('id', restaurant_tags.tag_id, 'title', tags.title, 'type', tags.type)) as tags FROM restaurant_tags LEFT JOIN tags ON restaurant_tags.tag_id = tags.id GROUP BY restaurant_tags.restaurant_id) as tags ON restaurants.id = tags.restaurant_id;`;
-
+        
         const result: RestaurantsInterface[] = (await db.query(query)).rows;
 
         res.status(200).json({ status: "success", data: result });
@@ -17,17 +17,22 @@ export async function getRestaurants(req: Request, res: Response) {
 
 export async function postRestaurant(req: Request, res: Response) {
     try {
+
         const body: RestaurantsInterfaceBody = req.body;
 
-        let query: string = `WITH restIns AS (INSERT INTO restaurants(name, website, phone) VALUES('${body.name}', '${body.website}', ${body.phone}) RETURNING id as restaurant_id)`;
+        let query: string = `WITH restIns AS (INSERT INTO restaurants(name, website, phone) VALUES('${body.name}', '${body.website}', ${body.phone}) RETURNING id as restaurant_id),`;
   
         if (body.tags) {
-            query += ` INSERT INTO restaurant_tags(restaurant_id, tag_id) VALUES`;
+            query += ` restIns2 AS (INSERT INTO restaurant_tags(restaurant_id, tag_id) VALUES`;
             for (let i = 0; i < body.tags.length; i++) {
                 query += `((SELECT restaurant_id FROM restIns), '${body.tags[i]}')`;
-                i === body.tags.length - 1 ? (query += ";") : (query += ", ");
+                i === body.tags.length - 1 ? (query += ")") : (query += ", ");
             }
         }
+
+        query += ` INSERT INTO restaurant_users (restaurant_id, user_id, role) VALUES ((SELECT restaurant_id FROM restIns), '${req.session.userId}', 'OWNER');`
+        
+        console.log(query)
     
         await db.query(query);
 

@@ -1,7 +1,8 @@
 import express from "express"
 import { deleteTag, getTag, getTags, postTag, putTag } from "../controller/tags";
-const router = express.Router();
-
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+const router = express.Router({ mergeParams: true });
 /**
  * @swagger
  * tags:
@@ -50,7 +51,7 @@ router.get("/", getTags)
  *       500: 
  *         description: Internal server error
  */
-router.post("/", postTag)
+router.post("/", authenticate, authorize("SUPER-ADMIN"), postTag)
 
 /**
  * @swagger
@@ -107,7 +108,7 @@ router.get("/:tag_id", getTag)
  *        500: 
  *          description: Internal server error
  */
-router.put("/:tag_id", putTag)
+router.put("/:tag_id", authenticate, authorize("SUPER-ADMIN"), putTag)
 
 /**
  * @swagger
@@ -130,6 +131,6 @@ router.put("/:tag_id", putTag)
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:tag_id", deleteTag)
+router.delete("/:tag_id", authenticate, authorize("SUPER-ADMIN"), deleteTag)
 
 export default router

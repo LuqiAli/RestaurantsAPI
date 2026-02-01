@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteMenuItem, getMenuItem, getMenuItems, postMenuItems, putMenuItem } from "../controller/menu-items.contoller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -11,10 +14,17 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/menu-items:
+ * /api/v1/restaurants/{restaurant_id}/menu-items:
  *   get:
  *     summary: Retrieve all menu items
  *     tags: [Menu Items]
+ *     parameters:
+ *       - in: path
+ *         name: restaurant_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Restaurant ID  
  *     responses:
  *       200:
  *         description: A list of all menu items
@@ -25,10 +35,17 @@ router.get("/", getMenuItems);
 
 /**
  * @swagger
- * /api/v1/menu-items:
+ * /api/v1/restaurants/{restaurant_id}/menu-items:
  *   post:
  *     summary: Post new menu item
  *     tags: [Menu Items]
+ *     parameters:
+ *       - in: path
+ *         name: restaurant_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Restaurant ID  
  *     requestBody:
  *       required: true
  *       content:
@@ -57,11 +74,11 @@ router.get("/", getMenuItems);
  *       500: 
  *         description: Internal server error
  */
-router.post("/", postMenuItems);
+router.post("/", authenticate, authorize("USER"), ownershipHandler, postMenuItems);
 
 /**
  * @swagger
- * /api/v1/menu-items/{menu_item_id}:
+ * /api/v1/restaurants/{restaurant_id}/menu-items/{menu_item_id}:
  *    get:
  *      summary: Get menu item by ID
  *      tags: [Menu Items]
@@ -72,6 +89,12 @@ router.post("/", postMenuItems);
  *          schema:
  *            type: string
  *          description: Menu item ID
+ *        - in: path
+ *          name: restaurant_id
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Restaurant ID  
  *      responses:
  *        200:
  *          description: List a menu item
@@ -84,7 +107,7 @@ router.get("/:menu_item_id", getMenuItem);
 
 /**
  * @swagger
- * /api/v1/menu-items/{menu_item_id}:
+ * /api/v1/restaurants/{restaurant_id}/menu-items/{menu_item_id}:
  *    put:
  *      summary: Update menu item
  *      tags: [Menu Items]
@@ -95,6 +118,12 @@ router.get("/:menu_item_id", getMenuItem);
  *          schema:
  *            type: string
  *          description: Menu item ID
+ *        - in: path
+ *          name: restaurant_id
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Restaurant ID  
  *      requestBody:
  *        required: true
  *        content:
@@ -120,7 +149,7 @@ router.get("/:menu_item_id", getMenuItem);
  *        500:
  *          description: Internal server error
  */
-router.put("/:menu_item_id", putMenuItem);
+router.put("/:menu_item_id", authenticate, authorize("USER"), ownershipHandler, putMenuItem);
 
 /**
  * @swagger
@@ -135,6 +164,12 @@ router.put("/:menu_item_id", putMenuItem);
  *          schema:
  *            type: string
  *          description: Menu item ID
+ *        - in: path
+ *          name: restaurant_id
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Restaurant ID  
  *      responses:
  *        204:
  *          description: Menu item deleted successfully
@@ -143,6 +178,6 @@ router.put("/:menu_item_id", putMenuItem);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:menu_item_id", deleteMenuItem);
+router.delete("/:menu_item_id", authenticate, authorize("USER"), ownershipHandler, deleteMenuItem);
 
 export default router

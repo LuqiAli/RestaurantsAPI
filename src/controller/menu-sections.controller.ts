@@ -4,7 +4,9 @@ import db from "../config/db"
 
 export async function getMenuSections(req: Request, res: Response) {
     try {
-        const result: MenuSectionsInterface[] = (await db.query("SELECT * FROM menu_sections;")).rows;
+        const { restaurant_id } = req.params
+        
+        const result: MenuSectionsInterface[] = (await db.query(`SELECT * FROM menu_sections WHERE restaurant_id = '${restaurant_id}';`)).rows;
     
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
@@ -15,7 +17,9 @@ export async function getMenuSections(req: Request, res: Response) {
 
 export async function postMenuSections(req: Request, res: Response) {
     try {
-        const { restaurant_id, name } = req.body as MenuSectionsInterfaceBody;
+        const { name } = req.body as MenuSectionsInterfaceBody;
+        const { restaurant_id } = req.params
+        
         await db.query(
             `INSERT INTO menu_sections (restaurant_id, name) VALUES ('${restaurant_id}', '${name}');`
         );
@@ -29,9 +33,9 @@ export async function postMenuSections(req: Request, res: Response) {
 
 export async function getMenuSection(req: Request, res: Response) {
     try {
-        const { menu_section_id } = req.params;
+        const { menu_section_id, restaurant_id } = req.params;
         const result: MenuSectionsInterface = (await db.query(
-            `SELECT * FROM menu_sections WHERE id = '${menu_section_id}';`
+            `SELECT * FROM menu_sections WHERE id = '${menu_section_id}' AND restaurant_id = '${restaurant_id}';`
         )).rows;
 
         res.status(200).json({ status: "success", data: result });

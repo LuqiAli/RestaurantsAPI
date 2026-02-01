@@ -50,7 +50,7 @@ npm start
 
 ## API Endpoints
 
-API documentation has been implemented using Swagger UI under the endpoint **/api/v1/docs**; however, I have included a basic explanation below
+API documentation has been implemented using Swagger UI under the endpoint _**/api/v1/docs**_; however, I have included a basic explanation below
 
 ### Auth
 
@@ -61,13 +61,13 @@ API documentation has been implemented using Swagger UI under the endpoint **/ap
 
 ### Addresses
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/addresses | Get all addresses | n/a |
-| POST | /api/v1/addresses| Post new address | link_id**, type***, address_1*, address_2*, address_3*, city, town, postcode, country |
-| GET | /api/v1/addresses/:id | Get address by id | n/a |
-| PUT | /api/v1/addresses/:id | Update address | address_1, address_2*, address_3*, city, town, postcode, country |
-| DELETE | /api/v1/addresses/:id | Delete address | n/a |
+| Method | Endpoint        | Authentication | Authorization role | Checks | Description | Expected input in body |
+|------|----------------|-------------------|--------------------|--------|-------------|------------------------|
+| GET | /api/v1/addresses | Yes | SUPER-ADMIN | n/a | Get all addresses | n/a |
+| POST | /api/v1/addresses| Yes | USER | n/a |Post new address | link_id**, type***, address_1*, address_2*, address_3*, city, town, postcode, country |
+| GET | /api/v1/addresses/:id | Yes | USER | If address belongs to authenticated user | Get address by id | n/a |
+| PUT | /api/v1/addresses/:id | Yes | USER | If address belongs to authenticated user | Update address | address_1, address_2*, address_3*, city, town, postcode, country |
+| DELETE | /api/v1/addresses/:id | Yes | USER | If address belongs to authenticated user | Delete address | n/a |
 
 >\*Not required
 >**Id which links to either the restaurant or user
@@ -75,103 +75,106 @@ API documentation has been implemented using Swagger UI under the endpoint **/ap
 
 ### Restaurants
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/restaurants | Get all restaurants | n/a |
-| POST | /api/v1/restaurants| Post new restaurant | name, website, phone, tags* |
-| GET | /api/v1/restaurants/:id | Get restaurant by id | n/a |
-| PUT | /api/v1/restaurants/:id | Update restaurant | name, website, phone, tags* |
-| DELETE | /api/v1/restaurants/:id | Delete restaurant | n/a |
+| Method | Endpoint    | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|---------------|---------------|--------|-------------|---------------------------|
+| GET | /api/v1/restaurants | n/a | n/a | n/a | Get all restaurants | n/a |
+| POST | /api/v1/restaurants| Yes | USER | n/a | Post new restaurant | name, website, phone, tags* |
+| GET | /api/v1/restaurants/:id | n/a | n/a | n/a | Get restaurant by id | n/a |
+| PUT | /api/v1/restaurants/:id | Yes | USER | If restaurant belongs to authenticated user | Update restaurant | name, website, phone, tags* |
+| DELETE | /api/v1/restaurants/:id | Yes | USER | If restaurant belongs to authenticated user | Delete restaurant | n/a |
 
 >\*An array of tags, implementation for restaurant tags will be implemented at a later date
 
 ### Users
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/users | Get all users | n/a |
-| POST | /api/v1/users| Post new user | name, password, email, phone |
-| GET | /api/v1/users/:id | Get user by id | n/a |
-| PUT | /api/v1/users/:id | Update user | name, password, email, phone |
-| DELETE | /api/v1/users/:id | Delete user | n/a |
+| Method | Endpoint    | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|--------------|----------|--------|-----------|---------------------------|
+| GET | /api/v1/users | yes | SUPER-ADMIN | n/a | Get all users | n/a |
+| POST | /api/v1/users| n/a | n/a | n/a | Post new user | name, password, email, phone |
+| GET | /api/v1/users/:id | Yes | USER | If user belongs to authenticated user | Get user by id | n/a |
+| PUT | /api/v1/users/:id | Yes | USER | If user belongs to authenticated user | Update user | name, password, email, phone |
+| DELETE | /api/v1/users/:id | Yes | USER | If user belongs to authenticated user | Delete user | n/a |
 
 ### Orders
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/orders | Get all orders | n/a |
-| POST | /api/v1/orders| Post new order | restaurant_id, user_id, delivery_address, type*, items** |
-| GET | /api/v1/orders/:id | Get order by id | n/a |
-| PUT | /api/v1/orders/:id | Update order | status*** |
-| DELETE | /api/v1/orders/:id | Delete order | n/a |
+| Method | Endpoint    | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|-------------|----------------------|--------|-----------|----------|
+| GET | /api/v1/orders | Yes | SUPER-ADMIN | n/a | Get all orders | n/a |
+| POST | /api/v1/orders| Yes | USER | n/a | Post new order | restaurant_id, user_id, delivery_address, type*, items** |
+| GET | /api/v1/orders/:id | Yes | USER | If order belongs to authenticated user | Get order by id | n/a |
+| PUT | /api/v1/orders/:id | Yes | USER | If order or restaurant belongs to authenticated user**** | Update order | status*** |
+| DELETE | /api/v1/orders/:id | Yes | SUPER-ADMIN | n/a | Delete order | n/a |
 
 >\*Type of enum, only accepts: delivery or collection
 >**Type of array containing objects: [{item_id, quantity, item_price}]
->***Type of enum, only accepts: processing, recieved, preparing, delivery
+>***Type of enum, only accepts: processing, recieved, preparing, delivery, cancelled
+>****If status is anything but "cancelled" restaurant owner can modify
 
 ### Tags
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/tags | Get all tags | n/a |
-| POST | /api/v1/tags| Post new tag | title, type* |
-| GET | /api/v1/tags/:id | Get tag by id | n/a |
-| PUT | /api/v1/tags/:id | Update tag | title, type* |
-| DELETE | /api/v1/tags/:id | Delete tag | n/a |
+| Method | Endpoint    | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|-------------|---------------------|---------|-------------|------------------------|
+| GET | /api/v1/tags | n/a | n/a | n/a | Get all tags | n/a |
+| POST | /api/v1/tags| Yes | SUPER-ADMIN | n/a | Post new tag | title, type* |
+| GET | /api/v1/tags/:id | Yes | SUPER-ADMIN | n/a | Get tag by id | n/a |
+| PUT | /api/v1/tags/:id | Yes | SUPER-ADMIN | n/a | Update tag | title, type* |
+| DELETE | /api/v1/tags/:id | Yes | SUPER-ADMIN | n/a | Delete tag | n/a |
 
 >\*Type of enum, only accepts: cuisine, dietary, dishes, type
 
 ### Menu Sections
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/menu-sections | Get all menu sections | n/a |
-| POST | /api/v1/menu-sections| Post new menu section | restaurant_id, name |
-| GET | /api/v1/menu-sections/:id | Get menu section by id | n/a |
-| PUT | /api/v1/menu-sections/:id | Update menu section | name |
-| DELETE | /api/v1/menu-sections/:id | Delete menu section | n/a |
+| Method | Endpoint | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|-------------|---------------------------|--|-------|--------------|
+| GET | /api/v1/restaurants/:restaurant_id/menu-sections | n/a | n/a | n/a | Get all menu sections | n/a |
+| POST | /api/v1/restaurants/:restaurant_id/menu-sections| Yes | USER | If authenticated user owns restaurant | Post new menu section | restaurant_id, name |
+| GET | /api/v1/restaurants/:restaurant_id/menu-sections/:id | n/a | n/a | n/a | Get menu section by id | n/a |
+| PUT | /api/v1/restaurants/:restaurant_id/menu-sections/:id | Yes | USER | If authenticated user owns restaurant | Update menu section | name |
+| DELETE | /api/v1/restaurants/:restaurant_id/menu-sections/:id | Yes | USER | If authenticated user owns restaurant | Delete menu section | n/a |
 
 ### Menu Items
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/menu-items | Get all menu items | n/a |
-| POST | /api/v1/menu-items| Post new menu item | menu_id, name, description, price |
-| GET | /api/v1/menu-items/:id | Get menu item by id | n/a |
-| PUT | /api/v1/menu-items/:id | Update menu item | name, description, price |
-| DELETE | /api/v1/menu-items/:id | Delete menu item | n/a |
+| Method | Endpoint | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|-------------|-------------------|--------|---------|-------------------|
+| GET | /api/v1/restaurants/:restaurant_id/menu-items | n/a | n/a | n/a | Get all menu items | n/a |
+| POST | /api/v1/restaurants/:restaurant_id/menu-items| Yes | USER | If authenticated user owns restaurant | Post new menu item | menu_id, name, description, price |
+| GET | /api/v1/restaurants/:restaurant_id/menu-items/:id | n/a | n/a | n/a | Get menu item by id | n/a |
+| PUT | /api/v1/restaurants/:restaurant_id/menu-items/:id | Yes | USER | If authenticated user owns resataurant | Update menu item | name, description, price |
+| DELETE | /api/v1/restaurants/:restaurant_id/menu-items/:id | Yes | USER | If authenticated user owns restaurant | Delete menu item | n/a |
 
 ### Menu Items Options
 
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/menu-item-options | Get all menu item options | n/a |
-| POST | /api/v1/menu-item-options| Post new menu item option | menu_item_id, name, price |
-| GET | /api/v1/menu-item-options/:id | Get menu item option by id | n/a |
-| PUT | /api/v1/menu-item-options/:id | Update menu item option | name, price |
-| DELETE | /api/v1/menu-item-options/:id | Delete menu item option | n/a |
+| Method | Endpoint  | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|-------------|--------------------|-------|----------------|-------------|
+| GET | /api/v1/menu-item-options | n/a | n/a | n/a | Get all menu item options | n/a |
+| POST | /api/v1/menu-item-options| Yes | USER | If authenticated user owns restaurant | Post new menu item option | menu_item_id, name, price |
+| GET | /api/v1/menu-item-options/:id | n/a | n/a | n/a | Get menu item option by id | n/a |
+| PUT | /api/v1/menu-item-options/:id | Yes | USER | If authenticated user owns resataurant | Update menu item option | name, price |
+| DELETE | /api/v1/menu-item-options/:id | Yes | USER | If authenticated user owns restaurant | Delete menu item option | n/a |
+
+### Reviews
+
+| Method | Endpoint | Authentication | Authorization Role | Checks | Description | Expected input in body |
+|------|----------------|-------------|-------------------|--------|------------|---------------|
+| GET | /api/v1/reviews | n/a | n/a | n/a | Get all reviews | n/a |
+| POST | /api/v1/reviews| Yes | USER | n/a | Post new review | restaurant_id, user_id, review, rating |
+| GET | /api/v1/reviews/:id | n/a | n/a | n/a | Get review by id | n/a |
+| PUT | /api/v1/reviews/:id | Yes | USER | If authenticated user owns review | Update review | description, link |
+| DELETE | /api/v1/reviews/:id | Delete review | Yes | USER | If authenticated user owns review | n/a |
 
 ### Notifications
+
+Currently the notifications endpoint is not functional.
 
 | Method | Endpoint        | Description | Expected input in body |
 |------|----------------|-------------|---------------------------|
 | GET | /api/v1/notifications | Get all notifications | n/a |
-| POST | /api/v1/notifications| Post new notification | user_id, type*, description, link |
+| POST | /api/v1/notifications| Post new notification | user_id, type*, description, link, is_read |
 | GET | /api/v1/notifications/:id | Get notification by id | n/a |
-| PUT | /api/v1/notifications/:id | Update notification | type*, description, link |
+| PUT | /api/v1/notifications/:id | Update notification | type*, description, link, is_read |
 | DELETE | /api/v1/notifications/:id | Delete notification | n/a |
 
 >\*Type of enum, only accepts: informational, success, warning, error
-
-### Reviews
-
-| Method | Endpoint        | Description | Expected input in body |
-|------|----------------|-------------|---------------------------|
-| GET | /api/v1/reviews | Get all reviews | n/a |
-| POST | /api/v1/reviews| Post new review | restaurant_id, user_id, review, rating |
-| GET | /api/v1/reviews/:id | Get review by id | n/a |
-| PUT | /api/v1/reviews/:id | Update review | description, link |
-| DELETE | /api/v1/reviews/:id | Delete review | restaurant_id, user_id, review, rating |
 
 ## Authentication
 

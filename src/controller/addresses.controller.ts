@@ -15,13 +15,19 @@ export async function getAddresses(req: Request, res: Response) {
 export async function postAddress(req: Request, res: Response) {
     try {
         const body: AddressInterfaceBody  = req.body;
-        let query: string;
+        let query: string = `WITH addIns AS (INSERT INTO addresses (address_1, address_2, address_3, city, town, postcode, country) VALUES ('${body.address_1}', '${body.address_2}', '${body.address_3}', '${body.city}', '${body.town}', '${body.postcode}', '${body.country}') RETURNING id as address_id)`;
 
-        if (body.type === "restaurant") {
-            query = `INSERT INTO addresses (restaurant_id, is_restaurant, address_1, address_2, address_3, city, town, postcode, country) VALUES ('${body.link_id}', True, '${body.address_1}', '${body.address_2}', '${body.address_3}', '${body.city}', '${body.town}', '${body.postcode}', '${body.country}');`;
+        
+        if (body.type === "user" && (!body.user_address_type || !body.is_primary)) {
+            res.status(400).json({ status: "failure", data: "Enter values in [user_address_type] & [is_primary] fields" })
+            throw new Error('If address type is user, user_address_type and is_primary must be filled')
+        } else if (body.type === "user") {
+            query += `INSERT INTO user_addresses (user_id, address_id, type, is_primary) VALUES ('${body.link_id}', (SELECT address_id FROM addIns), '${body.user_address_type}', ${body.is_primary});`
         } else {
-            query = `INSERT INTO addresses (user_id, is_restaurant, address_1, address_2, address_3, city, town, postcode, country) VALUES ('${body.link_id}', False, '${body.address_1}', '${body.address_2}', '${body.address_3}', '${body.city}', '${body.town}', '${body.postcode}', '${body.country}');`;
+            query += `INSERT INTO restaurant_addresses (restaurant_id, address_id) VALUES ('${body.link_id}', (SELECT address_id FROM addIns));`
         }
+
+        console.log(query)
 
         await db.query(query);
 

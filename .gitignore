@@ -1,6 +1,3 @@
 node_modules/
-./db.js
-<<<<<<< HEAD
+./config/tables.sql
 .env
-=======
->>>>>>> cc0c154bca25823030e48b038a519f8015e7a6a2

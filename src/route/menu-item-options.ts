@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteMenuItemOptions, getMenuItemOption, getMenuItemOptions, postMenuItemOptions, putMenuItemOptions } from "../controller/menu-item-options.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -11,10 +14,17 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/menu-item-options:
+ * /api/v1/restaurants/{restaurant_id}/menu-item-options:
  *   get:
  *     summary: Retrieve all menu item options
  *     tags: [Menu Item Options]
+ *     parameters:
+ *       - in: path
+ *         name: restaurant_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Restaurant ID   
  *     responses:
  *       200:
  *         description: A list of all menu item options
@@ -26,10 +36,17 @@ router.get("/", getMenuItemOptions);
 
 /**
  * @swagger
- * /api/v1/menu-item-options:
+ * /api/v1/restaurants/{restaurant_id}/menu-item-options:
  *   post:
  *     summary: Post new menu item option
  *     tags: [Menu Item Options]
+ *     parameters:
+ *       - in: path
+ *         name: restaurant_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Restaurant ID
  *     requestBody:
  *       required: true
  *       content:
@@ -40,6 +57,7 @@ router.get("/", getMenuItemOptions);
  *               - menu_item_id
  *               - name
  *               - price
+ *               - required
  *             properties:
  *               menu_item_id: 
  *                 type: string
@@ -47,6 +65,8 @@ router.get("/", getMenuItemOptions);
  *                 type: string
  *               price:
  *                 type: number
+ *               required:
+ *                 type: boolean
  *     responses:
  *       201:
  *         description: Menu item option created successfully
@@ -55,11 +75,11 @@ router.get("/", getMenuItemOptions);
  *       500: 
  *         description: Internal server error
  */
-router.post("/", postMenuItemOptions);
+router.post("/",  authenticate, authorize("USER"), ownershipHandler, postMenuItemOptions);
 
 /**
  * @swagger
- * /api/v1/menu-item-options/{menu_item_option_id}:
+ * /api/v1/restaurants/{restaurant_id}/menu-item-options/{menu_item_option_id}:
  *    get:
  *      summary: Get menu item option by ID
  *      tags: [Menu Item Options]
@@ -70,6 +90,12 @@ router.post("/", postMenuItemOptions);
  *          schema:
  *            type: string
  *          description: Menu item option ID
+ *        - in: path
+ *          name: restaurant_id
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Restaurant ID
  *      responses:
  *        200:
  *          description: List a menu item option
@@ -82,7 +108,7 @@ router.get("/:menu_item_option_id", getMenuItemOption);
 
 /**
  * @swagger
- * /api/v1/menu-item-options/{menu_item_option_id}:
+ * /api/v1/restaurants/{restaurant_id}/menu-item-options/{menu_item_option_id}:
  *    put:
  *      summary: Update menu item optiob
  *      tags: [Menu Item Options]
@@ -93,6 +119,12 @@ router.get("/:menu_item_option_id", getMenuItemOption);
  *          schema:
  *            type: string
  *          description: Menu item option ID
+ *        - in: path
+ *          name: restaurant_id
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Restaurant ID
  *      requestBody:
  *        required: true
  *        content:
@@ -102,22 +134,25 @@ router.get("/:menu_item_option_id", getMenuItemOption);
  *              required: 
  *                - name
  *                - price
+ *                - required
  *              properties:
  *                name: 
  *                  type: string
  *                price: 
- *                  type: number
+ *                  type: number 
+ *                required: 
+ *                  type: boolean
  *      responses:
  *        200:
  *          description: Updated menu item option successfully
  *        500:
  *          description: Internal server error
  */
-router.put("/:menu_item_option_id", putMenuItemOptions);
+router.put("/:menu_item_option_id", authenticate, authorize("USER"), ownershipHandler, putMenuItemOptions);
 
 /**
  * @swagger
- * /api/v1/menu-item-options/{menu_item_option_id}:
+ * /api/v1/restaurants/{restaurant_id}/menu-item-options/{menu_item_option_id}:
  *    delete:
  *      summary: Delete a menu item option
  *      tags: [Menu Item Options]
@@ -128,6 +163,12 @@ router.put("/:menu_item_option_id", putMenuItemOptions);
  *          schema:
  *            type: string
  *          description: Menu item option ID
+ *        - in: path
+ *          name: restaurant_id
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Restaurant ID  
  *      responses:
  *        204:
  *          description: Menu item option deleted successfully
@@ -136,6 +177,6 @@ router.put("/:menu_item_option_id", putMenuItemOptions);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:menu_item_option_id", deleteMenuItemOptions);
+router.delete("/:menu_item_option_id", authenticate, authorize("USER"), ownershipHandler, deleteMenuItemOptions);
 
 export default router

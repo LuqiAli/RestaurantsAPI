@@ -1,6 +1,8 @@
 import express from "express"
 import { deleteNotification, getNotification, getNotifications, postNotification, putNotification } from "../controller/notifications.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -21,7 +23,7 @@ const router = express.Router();
  *       500:
  *         description: Internal Server Error
  */
-router.get("/", getNotifications);
+router.get("/", authenticate, authorize("SUPER-ADMIN"), getNotifications);
 
 /**
  * @swagger
@@ -56,7 +58,7 @@ router.get("/", getNotifications);
  *       500: 
  *         description: Internal server error
  */
-router.post("/", postNotification)
+router.post("/", authenticate, authorize("USER"), postNotification)
 
 /**
  * @swagger
@@ -77,7 +79,7 @@ router.post("/", postNotification)
  *        500: 
  *          description: Internal server error
  */
-router.get("/:notification_id", getNotification);
+router.get("/:notification_id", authenticate, authorize("USER"), getNotification);
 
 /**
  * @swagger
@@ -116,7 +118,7 @@ router.get("/:notification_id", getNotification);
  *        500:
  *          description: Internal server error
  */
-router.put("/:notification_id", putNotification);
+router.put("/:notification_id", authenticate, authorize("USER"), putNotification);
 
 /**
  * @swagger
@@ -137,6 +139,6 @@ router.put("/:notification_id", putNotification);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:notification_id", deleteNotification);
+router.delete("/:notification_id", authenticate, authorize("USER"), deleteNotification);
 
 export default router

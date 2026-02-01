@@ -74,11 +74,6 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 
 CREATE TABLE addresses (
     id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    restaurant_id uuid,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
-    user_id uuid,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    is_restaurant BOOLEAN,
     address_1 VARCHAR(50) NOT NULL,
     address_2 VARCHAR(50),
     address_3 VARCHAR(50),
@@ -135,6 +130,8 @@ CREATE TABLE menu_items (
     name VARCHAR(25) NOT NULL,
     description VARCHAR(100),
     price NUMERIC(10, 2) NOT NULL,
+    restaurant_id uuid NOT NULL,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -145,6 +142,8 @@ CREATE TABLE menu_item_options (
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE,
     name VARCHAR(25) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
+    restaurant_id uuid NOT NULL,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -180,6 +179,45 @@ CREATE TABLE notifications (
     type notification_type NULL,
     description VARCHAR(255),
     link VARCHAR(30),
+    is_read BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TRIGGER set_timestamp 
+BEFORE UPDATE ON restaurant_users
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE TABLE restaurant_users (
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    restaurant_id uuid NOT NULL,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
+    user_id uuid NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(50) NOT NULL
+);
+
+CREATE TYPE user_addresses_type AS enum ('billing', 'delivery');
+
+CREATE TABLE user_addresses (
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    address_id uuid NOT NULL,
+    FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE CASCADE,
+    type user_addresses_type NOT NULL,
+    is_primary BOOLEAN DEFAULT false
+);
+
+CREATE TABLE restaurant_addresses (
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    restaurant_id uuid NOT NULL,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
+    address_id uuid NOT NULL,
+    FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE CASCADE
+);
+
+SELECT 1 AS access FROM (SELECT user_addresses.address_id FROM user_addresses WHERE user_addresses.address_id = '2c1622c3-743e-451b-a1fb-fb8942bab3af' AND user_addresses.user_id = 'bbaeee71-7748-4992-ae0c-a4b7fa85dc94' UNION ALL SELECT restaurant_addresses.address_id FROM restaurant_addresses JOIN restaurant_users ON restaurant_users.restaurant_id = restaurant_addresses.restaurant_id WHERE restaurant_addresses.address_id = '2c1622c3-743e-451b-a1fb-fb8942bab3af' AND restaurant_users.user_id = 'bbaeee71-7748-4992-ae0c-a4b7fa85dc94' AND restaurant_users.role = 'OWNER') LIMIT 1;
+
+SELECT 1 AS access FROM (SELECT restaurant_users.restaurant_id FROM restaurant_users JOIN restaurants ON restaurants.id = restaurant_users.restaurant_id WHERE user_id = 'bbaeee71-7748-4992-ae0c-a4b7fa85dc94' AND restaurant_id = (SELECT restaurant_id FROM reviews WHERE reviews.id = 'b420fd13-0c37-4093-a1d3-ad20d5a3b5f0'));

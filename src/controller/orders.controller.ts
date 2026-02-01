@@ -14,35 +14,32 @@ export async function getOrders(req: Request, res: Response) {
 
 export async function postOrder(req: Request, res: Response) {
     try {
-        const { restaurant_id, user_id, delivery_address, type, items } = req.body as OrdersInterfaceBody;
+        const { restaurant_id, delivery_address, is_delivery, items } = req.body as OrdersInterfaceBody;
+        const user_id = req.session.userId
 
-        let order_id: string
         let total_amount: number = 0
+        let query: string
         
         for (let i = 0; i < items.length; i++) {
-            total_amount += items[i].item_price
+            total_amount += (items[i].item_price * items[i].quantity)
         }
     
-        if (type === "delivery" && !delivery_address) {
+        if (is_delivery && !delivery_address) {
             res.status(500).json({status: "failure", data: "Please enter delivery address for a delivery order.",}).end();
         }
         
-        if (type !== "delivery") {
-            order_id = (await db.query(
-            `INSERT INTO orders (restaurant_id, user_id, is_delivery, total_amount) VALUES ('${restaurant_id}', '${user_id}', 'false', ${total_amount}) returning id;`
-            )).rows[0].id;
+        if (!is_delivery) {
+            query = `WITH ordersIns AS (INSERT INTO orders (restaurant_id, user_id, is_delivery, total_amount) VALUES ('${restaurant_id}', '${user_id}', ${is_delivery}, ${total_amount}) returning id as order_id)`
         } else {
-            order_id = (await db.query(
-                `INSERT INTO orders (restaurant_id, user_id, delivery_address, is_delivery, total_amount) VALUES ('${restaurant_id}', '${user_id}', '${delivery_address}', true, ${total_amount}) returning id;`
-            )).rows[0].id;
+            query = `WITH ordersIns AS (INSERT INTO orders (restaurant_id, user_id, delivery_address, is_delivery, total_amount) VALUES ('${restaurant_id}', '${user_id}', '${delivery_address}', ${is_delivery}, ${total_amount}) returning id as order_id)`
         }
-
-        console.log(order_id, items[0].item_id, items[0].quantity, items[0].item_price)
         
         for (let i = 0; i < items.length; i++) {
-            await db.query(`INSERT INTO order_items (order_id, item_id, quantity, item_price) VALUES ('${order_id}', '${items[i].item_id}', '${items[i].quantity}', '${items[i].item_price}');`)
+            query += `INSERT INTO order_items (order_id, item_id, quantity, item_price) VALUES ((SELECT order_id FROM ordersIns), '${items[i].item_id}', '${items[i].quantity}', '${items[i].item_price}');`
         }
         
+        await db.query(query)
+
         res.status(201).json({ status: "success" });
 
         

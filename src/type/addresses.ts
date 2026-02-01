@@ -1,8 +1,5 @@
 export interface AddressInterface {
     id: string
-    restaurant_id: string
-    user_id: string
-    is_restaurant: boolean
     address_1: string
     address_2: string
     address_3: string
@@ -16,6 +13,11 @@ export interface AddressInterface {
 
 export enum AddressType {
     RESTAURANT = "restaurant",
+    USER = "user"
+}
+
+export enum userAddressType {
+    BILLING = "billing",
     DELIVERY = "delivery"
 }
 
@@ -29,4 +31,6 @@ export interface AddressInterfaceBody {
     town: string
     postcode: string
     country: string
+    user_address_type: string
+    is_primary: boolean
 }

@@ -15,7 +15,8 @@ export async function getReviews(req: Request, res: Response) {
 
 export async function postReview(req: Request, res: Response) {
     try {
-        const { restaurant_id, user_id, rating, review } = req.body as ReviewsInterfaceBody;
+        const { restaurant_id, rating, review } = req.body as ReviewsInterfaceBody;
+        const user_id = req.session.userId
 
         if (rating < 0 || rating > 5) {
             res.status(400).json({ status: "failiure", data: "Rating must be between 0 & 5" })

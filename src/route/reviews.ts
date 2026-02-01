@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteReview, getReview, getReviews, postReview, putReview } from "../controller/reviews.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -21,7 +24,7 @@ const router = express.Router();
  *        500: 
  *          description: Internal server error
  */
-router.get("/", getReviews);
+router.get("/", authenticate, authorize("SUPER-ADMIN"), getReviews);
 
 /**
  * @swagger
@@ -37,13 +40,10 @@ router.get("/", getReviews);
  *             type: object
  *             required: 
  *               - restaurant_id
- *               - user_id
  *               - rating
  *               - review
  *             properties:
  *               restaurant_id: 
- *                 type: string
- *               user_id:
  *                 type: string
  *               review:
  *                 type: string  
@@ -57,7 +57,7 @@ router.get("/", getReviews);
  *       500: 
  *         description: Internal server error
  */
-router.post("/", postReview);
+router.post("/", authenticate, authorize("USER"), postReview);
 
 /**
  * @swagger
@@ -115,7 +115,7 @@ router.get("/:review_id", getReview);
  *        500:
  *          description: Review not found
  */
-router.put("/:review_id", putReview);
+router.put("/:review_id", authenticate, authorize("USER"), ownershipHandler, putReview);
 
 /**
  * @swagger
@@ -136,6 +136,6 @@ router.put("/:review_id", putReview);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:review_id", deleteReview);
+router.delete("/:review_id", authenticate, authorize("USER"), ownershipHandler, deleteReview);
 
 export default router

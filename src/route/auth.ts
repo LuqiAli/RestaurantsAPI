@@ -1,7 +1,7 @@
 import express from "express"
 import { loginController, logoutController } from "../controller/auth.controller";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/login:
+ * /api/v1/auth/login:
  *   post:
  *     summary: Login
  *     tags: [Authentication]
@@ -40,7 +40,7 @@ router.post("/login", loginController)
 
 /**
  * @swagger
- * /api/v1/logout:
+ * /api/v1/auth/logout:
  *   post:
  *     summary: Logout
  *     tags: [Authentication]  

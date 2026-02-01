@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteAddress, getAddress, getAddresses, postAddress, putAddress } from "../controller/addresses.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -21,7 +24,7 @@ const router = express.Router();
  *        500: 
  *          description: Internal server error
  */
-router.get("/", getAddresses);
+router.get("/", authenticate, authorize("SUPER-ADMIN"), getAddresses);
 
 /**
  * @swagger
@@ -62,14 +65,19 @@ router.get("/", getAddresses);
  *               postcode:
  *                 type: string  
  *               country:
- *                 type: string  
+ *                 type: string
+ *               user_address_type:
+ *                 type: string
+ *                 enum: [billing, delivery]
+ *               is_primary:
+ *                 type: boolean  
  *     responses:
  *       201:
  *         description: Address created successfully
  *       500: 
  *          description: Internal server error
  */
-router.post("/", postAddress);
+router.post("/", authenticate, authorize("USER"), postAddress);
 
 /**
  * @swagger
@@ -92,7 +100,7 @@ router.post("/", postAddress);
  *        500: 
  *          description: Internal server error
  */
-router.get("/:address_id", getAddress);
+router.get("/:address_id", authenticate, authorize("USER"), ownershipHandler, getAddress);
 
 /**
  * @swagger
@@ -140,7 +148,7 @@ router.get("/:address_id", getAddress);
  *        500:
  *          description: Address not found
  */
-router.put("/:address_id", putAddress);
+router.put("/:address_id", authenticate, authorize("USER"), ownershipHandler, putAddress);
 
 /**
  * @swagger
@@ -163,6 +171,6 @@ router.put("/:address_id", putAddress);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:address_id", deleteAddress);
+router.delete("/:address_id", authenticate, authorize("USER"), ownershipHandler, deleteAddress);
 
 export default router

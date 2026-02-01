@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteRestaurant, getRestaurant, getRestaurants, postRestaurant, putRestaurant } from "../controller/restaurants.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -57,7 +60,7 @@ router.get("/", getRestaurants);
  *        500: 
  *          description: Internal server error
  */
-router.post("/", postRestaurant);
+router.post("/", authenticate, authorize("USER"), postRestaurant);
 
 /**
  * @swagger
@@ -125,7 +128,7 @@ router.get("/:restaurant_id", getRestaurant);
  *        500: 
  *          description: Internal server error
  */
-router.put("/:restaurant_id", putRestaurant);
+router.put("/:restaurant_id", authenticate, authorize("USER"), ownershipHandler, putRestaurant);
 
 /**
  * @swagger
@@ -148,6 +151,6 @@ router.put("/:restaurant_id", putRestaurant);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:restaurant_id", deleteRestaurant);
+router.delete("/:restaurant_id", authenticate, authorize("USER"), ownershipHandler, deleteRestaurant);
 
 export default router

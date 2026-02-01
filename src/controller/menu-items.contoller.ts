@@ -4,7 +4,9 @@ import db from "../config/db"
 
 export async function getMenuItems(req: Request, res: Response) {
     try {
-        const result: MenuItemsInterface[] = (await db.query("SELECT * FROM menu_items;")).rows;
+        const { restaurant_id } = req.params
+        
+        const result: MenuItemsInterface[] = (await db.query(`SELECT * FROM menu_items WHERE restaurant_id = '${restaurant_id}';`)).rows;
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
@@ -16,17 +18,18 @@ export async function getMenuItems(req: Request, res: Response) {
 export async function postMenuItems(req: Request, res: Response) {
     try {
         const { menu_id, name, description, price } = req.body as MenuItemsInterfaceBody;
+        const { restaurant_id } = req.params
 
         if (!price.toString().includes(".")) {
             await db.query(
-                `INSERT INTO menu_items (menu_id, name, description, price) VALUES ('${menu_id}', '${name}', '${description}', '${price}');`
+                `INSERT INTO menu_items (menu_id, name, description, price, restaurant_id) VALUES ('${menu_id}', '${name}', '${description}', '${price}', '${restaurant_id}');`
             );
         } else if (price.toString().split(".")[1].length > 2) {
             res.status(400).json({ status: "failiure", data: "Price must have maximum of 2 decimal places." })
         } else {
-        await db.query(
-            `INSERT INTO menu_items (menu_id, name, description, price) VALUES ('${menu_id}', '${name}', '${description}', '${price}');`
-        );
+            await db.query(
+                `INSERT INTO menu_items (menu_id, name, description, price, restaurant_id) VALUES ('${menu_id}', '${name}', '${description}', '${price}', '${restaurant_id}');`
+            );
         res.status(201).json({ status: "success" });
         }
     } catch (err) {
@@ -38,6 +41,7 @@ export async function postMenuItems(req: Request, res: Response) {
 export async function getMenuItem(req: Request, res: Response) {
     try {
         const { menu_item_id } = req.params;
+        console.log(req.params)
 
         const result: MenuItemsInterface = (await db.query(
             `SELECT * FROM menu_items WHERE id = '${menu_item_id}';`
@@ -51,12 +55,12 @@ export async function getMenuItem(req: Request, res: Response) {
 
 export async function putMenuItem(req: Request, res: Response) {
     try {
-        const { menu_item_id } = req.params;
+        const { menu_item_id, restaurant_id } = req.params;
         const { name, description, price } = req.body as MenuItemsInterfaceBody;
 
         if (!price.toString().includes(".")) {
         await db.query(
-            `UPDATE menu_items set name = '${name}', description = '${description}', price = '${price}' WHERE id = '${menu_item_id}';`
+            `UPDATE menu_items set name = '${name}', description = '${description}', price = '${price}' WHERE id = '${menu_item_id}' AND restaurant_id = '${restaurant_id}';`
         );
         } else if (price.toString().split(".")[1].length > 2) {
             res.status(400).json({ status: "failiure", data: "Price must have maximum of 2 decimal places." })

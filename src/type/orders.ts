@@ -2,14 +2,15 @@ export enum OrderStatus {
     PROCESSING = "processing",
     RECEIVED = "received",
     PREPARING = "preparing",
-    DELIVERY = "delivery"
+    DELIVERY = "delivery",
+    CANCELLED = "cancelled"
 }
 
 export interface OrdersInterface {
     id: string
     restaurant_id: string
-    user_id: string
     is_delivery: boolean
+    user_id: string
     status: OrderStatus
     order_items: {
         order_items_id: string
@@ -19,16 +20,10 @@ export interface OrdersInterface {
     }
 }
 
-export enum OrderType { 
-    DELIVERY = "delivery",
-    COLLECTION = "collection"
-}
-
 export interface OrdersInterfaceBody {
     restaurant_id: string
-    user_id: string
     delivery_address: string
-    type: OrderType
+    is_delivery: boolean
     items: {
         item_id: string
         quantity: number

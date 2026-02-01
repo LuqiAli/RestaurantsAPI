@@ -15,10 +15,10 @@ export async function getNotifications(req: Request, res: Response) {
 
 export async function postNotification(req: Request, res: Response) {
     try {
-        const { user_id, type, description, link } = req.body as NotificationsInterfaceBody;
+        const { user_id, type, description, link, is_read } = req.body as NotificationsInterfaceBody;
 
         await db.query(
-            `INSERT INTO notifications (user_id, type, description, link) VALUES ('${user_id}', '${type}', '${description}', '${link}');`
+            `INSERT INTO notifications (user_id, type, description, link, is_read) VALUES ('${user_id}', '${type}', '${description}', '${link}', '${is_read}');`
         );
         res.status(201).json({ status: "success" });
     } catch (err) {
@@ -44,10 +44,10 @@ export async function getNotification(req: Request, res: Response) {
 export async function putNotification(req: Request, res: Response) {
     try {
         const { notification_id } = req.params;
-        const { type, description, link } = req.body as NotificationsInterfaceBody;
+        const { type, description, link, is_read } = req.body as NotificationsInterfaceBody;
 
         await db.query(
-            `UPDATE notifications set type = '${type}', description = '${description}', link = '${link}' WHERE id = '${notification_id}';`
+            `UPDATE notifications set type = '${type}', description = '${description}', link = '${link}', is_read = '${is_read}' WHERE id = '${notification_id}';`
         );
         res.status(200).json({ status: "success" });
     } catch (err) {

@@ -10,7 +10,6 @@ export interface ReviewsInterface {
 
 export interface ReviewsInterfaceBody {
     restaurant_id: string
-    user_id: string
     rating: number
     review: string
 }

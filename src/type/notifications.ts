@@ -11,6 +11,7 @@ export interface NotificationsInterface {
     type: NotificationType
     description: string
     link: string
+    is_read: boolean
     created_at: string
     updated_at: string
 }
@@ -20,4 +21,5 @@ export interface NotificationsInterfaceBody {
     type: NotificationType
     description: string
     link: string
+    is_read: boolean
 }

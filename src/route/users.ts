@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteUser, getUser, getUsers, postUser, putUser } from "../controller/users.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -21,7 +24,7 @@ const router = express.Router();
  *        500: 
  *          description: Internal server error
  */
-router.get("/", getUsers);
+router.get("/", authenticate, authorize("SUPER-ADMIN"), getUsers);
 
 /**
  * @swagger
@@ -78,7 +81,7 @@ router.post("/", postUser);
  *        500: 
  *          description: Internal server error
  */
-router.get("/:user_id", getUser);
+router.get("/:user_id", authenticate, authorize("USER"), ownershipHandler, getUser);
 
 /**
  * @swagger
@@ -122,7 +125,7 @@ router.get("/:user_id", getUser);
  *        500: 
  *          description: Internal server error
  */
-router.put("/:user_id", putUser)
+router.put("/:user_id", authenticate, authorize("USER"), ownershipHandler, putUser)
 
 /**
  * @swagger
@@ -145,6 +148,6 @@ router.put("/:user_id", putUser)
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:user_id", deleteUser);
+router.delete("/:user_id", authenticate, authorize("USER"), ownershipHandler, deleteUser);
 
 export default router

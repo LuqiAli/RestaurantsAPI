@@ -1,6 +1,9 @@
 import express from "express"
 import { deleteOrder, getOrder, getOrders, postOrder, putOrder } from "../controller/orders.controller";
-const router = express.Router();
+import { authenticate } from "../middleware/authenticate";
+import { authorize } from "../middleware/authorize";
+import { ownershipHandler } from "../middleware/ownershipHandler";
+const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -21,7 +24,7 @@ const router = express.Router();
  *       500:
  *         description: Internal Server Error
  */
-router.get("/", getOrders);
+router.get("/", authenticate, authorize("SUPER-ADMIN"), getOrders);
 
 /**
  * @swagger
@@ -36,21 +39,17 @@ router.get("/", getOrders);
  *           schema:
  *             type: object
  *             required: 
- *               - restaurant_id
- *               - user_id    
- *               - type
+ *               - restaurant_id 
+ *               - items
+ *               - is_delivery
  *             properties:
  *               restaurant_id: 
- *                 type: string
- *               user_id:
  *                 type: string
  *               delivery_address:
  *                 type: string
  *                 nullable: true
- *               type:
- *                 type: string
- *                 enum: [delivery, collection]
- *                 description: Order type
+ *               is_delivery:
+ *                 type: boolean
  *               items: 
  *                  type: array
  *                  items:
@@ -68,7 +67,7 @@ router.get("/", getOrders);
  *       500: 
  *         description: Internal server error
  */
-router.post("/", postOrder);
+router.post("/", authenticate, authorize("USER"), postOrder);
 
 /**
  * @swagger
@@ -91,7 +90,7 @@ router.post("/", postOrder);
  *        500: 
  *          description: Internal server error
  */
-router.get("/:order_id", getOrder);
+router.get("/:order_id", authenticate, authorize("USER"), ownershipHandler, getOrder);
 
 /**
  * @swagger
@@ -124,7 +123,7 @@ router.get("/:order_id", getOrder);
  *        500:
  *          description: Internal server error
  */
-router.put("/:order_id", putOrder);
+router.put("/:order_id", authenticate, authorize("USER"), ownershipHandler, putOrder);
 
 /**
  * @swagger
@@ -147,6 +146,6 @@ router.put("/:order_id", putOrder);
  *        500: 
  *          description: Internal server error
  */
-router.delete("/:order_id", deleteOrder);
+router.delete("/:order_id", authenticate, authorize("SUPER-ADMIN"), ownershipHandler, deleteOrder);
 
 export default router

@@ -17,7 +17,7 @@ export const sessionMiddleware = session({
     saveUninitialized: false,
     cookie: {
         secure: false, // true - only allows https
-        httpOnly: true, // true - prevents client JS reading cookie
+        httpOnly: false, // true - prevents client JS reading cookie
         maxAge: 1000 * 60 * 30
     }
 })
