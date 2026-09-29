@@ -1,82 +1,63 @@
-import { Request, Response } from "express"
-import { AddressInterface, AddressInterfaceBody } from "../type/addresses";
-import db from "../config/db"
+import { NextFunction, Request, Response } from "express"
+import { addressesService } from "../services/addresses.services";
+import { addressTypes } from "../schemas/addresses.schema";
 
-export async function getAddresses(req: Request, res: Response) {
+export async function getAddresses(req: Request, res: Response, next: NextFunction) {
     try {
-        const result: AddressInterface[] = (await db.query("SELECT * FROM addresses;")).rows;
+        const result = await addressesService.getAll()
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function postAddress(req: Request, res: Response) {
+export async function postAddress(req: Request, res: Response, next: NextFunction) {
     try {
-        const body: AddressInterfaceBody  = req.body;
-        let query: string = `WITH addIns AS (INSERT INTO addresses (address_1, address_2, address_3, city, town, postcode, country) VALUES ('${body.address_1}', '${body.address_2}', '${body.address_3}', '${body.city}', '${body.town}', '${body.postcode}', '${body.country}') RETURNING id as address_id)`;
-
+        const body: addressTypes["create"]  = req.body;
         
-        if (body.type === "user" && (!body.user_address_type || !body.is_primary)) {
-            res.status(400).json({ status: "failure", data: "Enter values in [user_address_type] & [is_primary] fields" })
-            throw new Error('If address type is user, user_address_type and is_primary must be filled')
-        } else if (body.type === "user") {
-            query += `INSERT INTO user_addresses (user_id, address_id, type, is_primary) VALUES ('${body.link_id}', (SELECT address_id FROM addIns), '${body.user_address_type}', ${body.is_primary});`
-        } else {
-            query += `INSERT INTO restaurant_addresses (restaurant_id, address_id) VALUES ('${body.link_id}', (SELECT address_id FROM addIns));`
-        }
-
-        console.log(query)
-
-        await db.query(query);
+        await addressesService.post(body)
 
         res.status(201).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function getAddress(req: Request, res: Response) {
+export async function getAddress(req: Request, res: Response, next: NextFunction) {
     try {
-        const { address_id } = req.params;
+        const address_id = req.params.address_id.toString();
 
-        console.log(address_id)  
-
-        const result: AddressInterface = (await db.query(`SELECT * FROM addresses WHERE id = '${address_id}'`)).rows;
+        const result = await addressesService.get(address_id)
+        
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }  
 }
 
-export async function putAddress(req: Request, res: Response) {
+export async function putAddress(req: Request, res: Response, next: NextFunction) {
     try {
-        const { address_id } = req.params;
-        const { address_1, address_2, address_3, city, town, postcode, country } =
-        req.body as AddressInterfaceBody;
+        const address_id = req.params.address_id.toString();
+        const { address_1, address_2, address_3, city, town, postcode, country } = req.body as addressTypes["update"];
+        
+        const inputData: addressTypes["update"] = {address_id, address_1, address_2, address_3, city, town, postcode, country}
 
-        await db.query(
-            `UPDATE addresses set address_1 = '${address_1}', address_2 = '${address_2}', address_3 = '${address_3}', city = '${city}', town = '${town}', postcode = '${postcode}', country = '${country}' WHERE id = '${address_id}';`
-        );
+        await addressesService.put(inputData)
 
         res.status(201).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function deleteAddress(req: Request, res: Response) {
+export async function deleteAddress(req: Request, res: Response, next: NextFunction) {
     try {
-        const { address_id } = req.params;
+        const address_id: string = req.params.address_id.toString();
 
-        await db.query(`DELETE FROM addresses WHERE id = '${address_id}';`);
+        await addressesService.deleteS(address_id)
+        
         res.status(204).end();
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err)
     }
 }

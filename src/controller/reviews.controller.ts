@@ -1,78 +1,63 @@
-import { Request, Response } from "express"
-import { ReviewsInterface, ReviewsInterfaceBody } from "../type/reviews";
-import db from "../config/db"
+import { NextFunction, Request, Response } from "express"
+import { reviewsService } from "../services/reviews.services";
+import { reviewsType } from "../schemas/reviews.schema";
 
-export async function getReviews(req: Request, res: Response) {
+export async function getReviews(req: Request, res: Response, next: NextFunction) {
     try {
-        const result: ReviewsInterface[] = (await db.query(`SELECT * FROM reviews;`)).rows;
+        const result = await reviewsService.getAll()
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
   }
 }
 
-export async function postReview(req: Request, res: Response) {
+export async function postReview(req: Request, res: Response, next: NextFunction) {
     try {
-        const { restaurant_id, rating, review } = req.body as ReviewsInterfaceBody;
-        const user_id = req.session.userId
+        const { restaurant_id, rating, review } = req.body as reviewsType["createBodyInput"];
+        const user_id: reviewsType["userId"] = req.session.userId
 
-        if (rating < 0 || rating > 5) {
-            res.status(400).json({ status: "failiure", data: "Rating must be between 0 & 5" })
-        } else {    
-            await db.query(
-                `INSERT INTO reviews (restaurant_id, user_id, rating, review) VALUES ('${restaurant_id}', '${user_id}', '${rating}', '${review}');`
-            );
-            res.status(201).json({ status: "success" });
-        }
+        await reviewsService.post({restaurant_id, rating, review, user_id})
+        
+        res.status(201).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function getReview(req: Request, res: Response) {
+export async function getReview(req: Request, res: Response, next: NextFunction) {
     try {
-        const { review_id } = req.params;
+        const { review_id } = req.params as reviewsType["paramInput"]
 
-        const result: ReviewsInterface = (await db.query(
-            `SELECT * FROM reviews WHERE id = '${review_id}';`
-        )).rows;
+        const result = await reviewsService.get({review_id})
+
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function putReview(req: Request, res: Response) {
+export async function putReview(req: Request, res: Response, next: NextFunction) {
     try {
-        const { review_id } = req.params;
-        const { rating, review } = req.body as ReviewsInterfaceBody;
+        const { review_id } = req.params as reviewsType["paramInput"]
+        const { rating, review } = req.body as reviewsType["updateBodyInput"];
 
-        if (rating < 0 || rating > 5) {
-            res.status(400).json({ status: "failiure", data: "Rating must be between 0 & 5" }).end()
-        } else {
-            await db.query(
-                `UPDATE reviews set rating = '${rating}', review = '${review}' WHERE id = '${review_id}';`
-            );
-            res.status(200).json({ status: "success" });
-        }
+        await reviewsService.put({review_id, rating, review})
+        
+        res.status(200).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function deleteReview(req: Request, res: Response) {
+export async function deleteReview(req: Request, res: Response, next: NextFunction) {
     try {
-        const { review_id } = req.params;
+        const { review_id } = req.params as reviewsType["paramInput"]
 
-        await db.query(`DELETE FROM reviews WHERE id = '${review_id}';`);
+        await reviewsService.deleteS({review_id})
+        
         res.status(204).end();
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }

@@ -1,91 +1,73 @@
-import { Request, Response } from "express"
-import { OrdersInterface, OrdersInterfaceBody } from "../type/orders";
-import db from "../config/db"
+import { NextFunction, Request, Response } from "express"
+import db from "../db/pool"
+import { ordersService } from "../services/orders.services";
+import { ordersTypes } from "../schemas/orders.schema";
 
-export async function getOrders(req: Request, res: Response) {
+export async function getOrders(req: Request, res: Response, next: NextFunction) {
     try {
-        const result: OrdersInterface[] = (await db.query("SELECT orders.id, orders.restaurant_id, orders.user_id, orders.is_delivery, orders.status, orders.delivery_address, orders.total_amount, (SELECT json_build_object('order_items_id', order_items.id, 'item_id', order_items.item_id, 'quantity', order_items.quantity, 'item_price', order_items.item_price) AS order_items FROM order_items) FROM orders;")).rows;
+        
+        const result = await ordersService.getAll()
+
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function postOrder(req: Request, res: Response) {
-    try {
-        const { restaurant_id, delivery_address, is_delivery, items } = req.body as OrdersInterfaceBody;
-        const user_id = req.session.userId
+export async function postOrder(req: Request, res: Response, next: NextFunction) {
 
-        let total_amount: number = 0
-        let query: string
-        
-        for (let i = 0; i < items.length; i++) {
-            total_amount += (items[i].item_price * items[i].quantity)
-        }
+    const client = await db.connect()
     
-        if (is_delivery && !delivery_address) {
-            res.status(500).json({status: "failure", data: "Please enter delivery address for a delivery order.",}).end();
-        }
-        
-        if (!is_delivery) {
-            query = `WITH ordersIns AS (INSERT INTO orders (restaurant_id, user_id, is_delivery, total_amount) VALUES ('${restaurant_id}', '${user_id}', ${is_delivery}, ${total_amount}) returning id as order_id)`
-        } else {
-            query = `WITH ordersIns AS (INSERT INTO orders (restaurant_id, user_id, delivery_address, is_delivery, total_amount) VALUES ('${restaurant_id}', '${user_id}', '${delivery_address}', ${is_delivery}, ${total_amount}) returning id as order_id)`
-        }
-        
-        for (let i = 0; i < items.length; i++) {
-            query += `INSERT INTO order_items (order_id, item_id, quantity, item_price) VALUES ((SELECT order_id FROM ordersIns), '${items[i].item_id}', '${items[i].quantity}', '${items[i].item_price}');`
-        }
-        
-        await db.query(query)
+    try {
+        const { restaurant_id, is_delivery, items } = req.body as ordersTypes["bodyInput"];
+        const user_id: ordersTypes["user_id_type"] = req.session.userId
+
+        await ordersService.post({restaurant_id, is_delivery, items, user_id, client})
 
         res.status(201).json({ status: "success" });
 
         
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ status: "failure", data: "Internal Server Error" });
-  }
+    } catch (err) {
+        await client.query("ROLLBACK")
+        next(err);
+    } finally {
+        client.release()
+    }
 }
 
-export async function getOrder(req: Request, res: Response) {
+export async function getOrder(req: Request, res: Response, next: NextFunction) {
     try {
-        const { order_id } = req.params;
-        const result: OrdersInterface = (await db.query(
-            `SELECT orders.id, orders.restaurant_id, orders.user_id, orders.is_delivery, orders.status, orders.delivery_address, orders.total_amount, (SELECT json_build_object('order_items_id', order_items.id, 'item_id', order_items.item_id, 'quantity', order_items.quantity, 'item_price', order_items.item_price) AS order_items FROM order_items) FROM orders WHERE id = '${order_id}';`
-            )).rows;
+        const { order_id } = req.params as ordersTypes["order_idInput"]
+        
+        const result = await ordersService.get({order_id})
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function putOrder(req: Request, res: Response) {
+export async function putOrder(req: Request, res: Response, next: NextFunction) {
     try {
-        const { order_id } = req.params;
-        const status: string = req.body.status;
+        const { order_id } = req.params as ordersTypes["order_idInput"]
+        const { status } = req.body as ordersTypes["updateBodyInput"]
     
-        await db.query(
-            `UPDATE orders set status = '${status}' WHERE id = '${order_id}';`
-        );
+        await ordersService.put({order_id, status})
+        
         res.status(201).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function deleteOrder(req: Request, res: Response) {
+export async function deleteOrder(req: Request, res: Response, next: NextFunction) {
     try {
-        const { order_id } = req.params;
+        const { order_id } = req.params as ordersTypes["order_idInput"]
 
-        await db.query(`DELETE FROM orders WHERE id = '${order_id}';`);
+        await ordersService.deleteS({order_id})
+        
         res.status(204).end();
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }

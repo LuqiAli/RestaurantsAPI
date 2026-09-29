@@ -1,75 +1,70 @@
-import { Request, Response } from "express"
-import { UsersInterface, UsersInterfaceBody } from "../type/users"
-import bcrypt from "bcrypt"
-import db from "../config/db"
+import { NextFunction, Request, Response } from "express"
+import db from "../db/pool"
+import { usersService } from "../services/users.services"
+import { usersTypes } from "../schemas/users.schema";
 
-export async function getUsers(req: Request, res: Response) {
+export async function getUsers(req: Request, res: Response, next: NextFunction) {
     try {
-        const result: UsersInterface[] = (await db.query("SELECT * FROM users;")).rows;
+        const result = await usersService.getAll()
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function postUser(req: Request, res: Response) {
+export async function postUser(req: Request, res: Response, next: NextFunction) {
+
+    const client = await db.connect()
+    
     try {
-        const { name, password, email, phone } = req.body as UsersInterfaceBody;
-
-        const hashedPass = await bcrypt.hash(password, 10)
-
-        await db.query(
-            `INSERT INTO users (name, password, email, phone) VALUES ('${name}', '${hashedPass}', '${email}', '${phone}');`
-        );
+        const { name, password, email, phone } = req.body as usersTypes["createBodyInput"];
+        
+        await usersService.post({name, password, email, phone, client})
+        
         res.status(201).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        await client.query("ROLLBACK;")
+        next(err);
+    } finally {
+        client.release()
     }
 }
 
-export async function getUser(req: Request, res: Response) {
+export async function getUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const { user_id } = req.params;
-        const result: UsersInterface = (await db.query(
-            `SELECT * FROM users WHERE id = '${user_id}';`
-        )).rows;
+        const { user_id } = req.params as usersTypes["paramInput"]
+        
+        const result = await usersService.get({user_id})
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function putUser(req: Request, res: Response) {
+export async function putUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const { user_id } = req.params;
-        const { name, password, email, phone } = req.body as UsersInterfaceBody;
+        const { user_id } = req.params as usersTypes["paramInput"]
+        const user_id_session: usersTypes["userId"] = req.session.userId
+        const { name, phone } = req.body as usersTypes["bodyInput"]
 
-        const hashedPass = await bcrypt.hash(password, 10)
-        
-        await db.query(
-            `UPDATE users set name = '${name}', password = '${hashedPass}', email = '${email}', phone = '${phone}' WHERE id = '${user_id}';`
-        );
+        await usersService.put({user_id, user_id_session, name, phone})
 
         res.status(200).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function deleteUser(req: Request, res: Response) {
+export async function deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const { user_id } = req.params;
+        const { user_id } = req.params as usersTypes["paramInput"]
 
-        await db.query(`DELETE FROM users WHERE id = '${user_id}'`);
+        await usersService.deleteS({user_id})
+        
         res.status(204).end();
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }

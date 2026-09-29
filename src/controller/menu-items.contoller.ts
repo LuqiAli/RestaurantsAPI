@@ -1,89 +1,64 @@
-import { Request, Response } from "express"
-import { MenuItemsInterface, MenuItemsInterfaceBody } from "../type/menu-items"
-import db from "../config/db"
+import { NextFunction, Request, Response } from "express"
+import { menuItemsService } from "../services/menu-items.services";
+import { menuItemTypes } from "../schemas/menu-items.schema";
 
-export async function getMenuItems(req: Request, res: Response) {
+export async function getMenuItems(req: Request, res: Response, next: NextFunction) {
     try {
-        const { restaurant_id } = req.params
+        const { menu_section_id } = req.params as menuItemTypes["getAllInput"]
         
-        const result: MenuItemsInterface[] = (await db.query(`SELECT * FROM menu_items WHERE restaurant_id = '${restaurant_id}';`)).rows;
+        const result = await menuItemsService.getAll({menu_section_id})
 
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function postMenuItems(req: Request, res: Response) {
+export async function postMenuItems(req: Request, res: Response, next: NextFunction) {
     try {
-        const { menu_id, name, description, price } = req.body as MenuItemsInterfaceBody;
-        const { restaurant_id } = req.params
+        const { name, description, price } = req.body as menuItemTypes["bodyInput"];
+        const { restaurant_id, menu_section_id } = req.params as menuItemTypes["paramInput"]
 
-        if (!price.toString().includes(".")) {
-            await db.query(
-                `INSERT INTO menu_items (menu_id, name, description, price, restaurant_id) VALUES ('${menu_id}', '${name}', '${description}', '${price}', '${restaurant_id}');`
-            );
-        } else if (price.toString().split(".")[1].length > 2) {
-            res.status(400).json({ status: "failiure", data: "Price must have maximum of 2 decimal places." })
-        } else {
-            await db.query(
-                `INSERT INTO menu_items (menu_id, name, description, price, restaurant_id) VALUES ('${menu_id}', '${name}', '${description}', '${price}', '${restaurant_id}');`
-            );
+        await menuItemsService.post({name, description, price, restaurant_id, menu_section_id})
+        
         res.status(201).json({ status: "success" });
-        }
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function getMenuItem(req: Request, res: Response) {
+export async function getMenuItem(req: Request, res: Response, next: NextFunction) {
     try {
-        const { menu_item_id } = req.params;
-        console.log(req.params)
-
-        const result: MenuItemsInterface = (await db.query(
-            `SELECT * FROM menu_items WHERE id = '${menu_item_id}';`
-        )).rows;
+        const { menu_item_id } = req.params as menuItemTypes["getInput"]
+        const result = await menuItemsService.get({menu_item_id})
+        
         res.status(200).json({ status: "success", data: result });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function putMenuItem(req: Request, res: Response) {
+export async function putMenuItem(req: Request, res: Response, next: NextFunction) {
     try {
-        const { menu_item_id, restaurant_id } = req.params;
-        const { name, description, price } = req.body as MenuItemsInterfaceBody;
+        const { menu_item_id, restaurant_id } = req.params as menuItemTypes["paramsInput"]
+        const { name, description, price } = req.body as menuItemTypes["bodyInput"]
 
-        if (!price.toString().includes(".")) {
-        await db.query(
-            `UPDATE menu_items set name = '${name}', description = '${description}', price = '${price}' WHERE id = '${menu_item_id}' AND restaurant_id = '${restaurant_id}';`
-        );
-        } else if (price.toString().split(".")[1].length > 2) {
-            res.status(400).json({ status: "failiure", data: "Price must have maximum of 2 decimal places." })
-        } else {
-            await db.query(
-                `UPDATE menu_items set name = '${name}', description = '${description}', price = '${price}' WHERE id = '${menu_item_id}';`
-            );
-        }
+        await menuItemsService.put({menu_item_id, restaurant_id, name, description, price})
+        
         res.status(201).json({ status: "success" });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }
 
-export async function deleteMenuItem(req: Request, res: Response) {
+export async function deleteMenuItem(req: Request, res: Response, next: NextFunction) {
     try {
-        const { menu_item_id } = req.params;
+        const { menu_item_id } = req.params as menuItemTypes["getInput"]
 
-        await db.query(`DELETE FROM menu_items WHERE id = '${menu_item_id}';`);
+        await menuItemsService.deleteS({menu_item_id})
+        
         res.status(204).end();
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: "failure", data: "Internal Server Error" });
+        next(err);
     }
 }

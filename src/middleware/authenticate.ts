@@ -1,12 +1,18 @@
 import { NextFunction, Request, Response } from "express";
+import { AppError } from "../utils/AppError";
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
 
-  if (!req.session || !req.session.userId) {
-    res.status(401).json({ status: "failure", data: "Unauthorized"})
-    const err = new Error("Unauthorized")
+  try {
+
+    if (!req.session || !req.session.userId) {
+      throw new AppError(401, "UNAUTHENTICATED", "User is not logged in")
+    }
+    
+    next()
+  } catch (err) {
     next(err)
   }
-  next()
+
 }
 
